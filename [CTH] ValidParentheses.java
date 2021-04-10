@@ -1,18 +1,5 @@
-
-/**
- * Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the
- * input string is valid.
- * <p>
- * An input string is valid if:
- * <p>
- * Open brackets must be closed by the same type of brackets. Open brackets must be closed in the
- * correct order.
- *
- * @author choiahser
- */
-public class ValidParentheses {
-
-    static Map<Character, Character> hashmap = new HashMap<>();
+class Solution {
+   static Map<Character, Character> hashmap = new HashMap<>();
 
     static {
         hashmap.put('(', ')');
@@ -31,13 +18,10 @@ public class ValidParentheses {
             } else if (hashmap.containsValue(token)) {
                 if (stack.isEmpty() || !hashmap.get(stack.pop()).equals(token)) {
                     return false;
-                }
-            } else {
-                throw new IllegalArgumentException("wrong token");
-            }
+                } 
+            } 
         }
+        
         return stack.isEmpty();
     }
-
 }
-
