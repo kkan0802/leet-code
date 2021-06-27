@@ -1,8 +1,10 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 public class LeetCodeEasySolutions {
@@ -78,11 +80,192 @@ public class LeetCodeEasySolutions {
 		System.out.println("Single Number case2: " + solution.singleNumber(new int[]{4,1,2,1,2}));
 		System.out.println("##################################");
 		
+		/*Linked List Cycle*/
+		ListNode llc = new ListNode(3,new ListNode(2,new ListNode(0,new ListNode(-4))));
+		System.out.println("Linked List Cycle case1: " + solution.hasCycle(llc));
+		System.out.println("##################################");
+		
+		/*Intersection of Two Linked Lists*/
+		ListNode headA = new ListNode(4,new ListNode(1,new ListNode(8,new ListNode(4,new ListNode(5)))));
+		ListNode headB = new ListNode(5,new ListNode(6,new ListNode(1,new ListNode(8,new ListNode(4,new ListNode(5))))));
+		System.out.println("Intersection of Two Linked Lists: " + solution.getIntersectionNode(headA, headB));
+		System.out.println("##################################");
+		
+		/*Majority Element*/
+		System.out.println("Majority Element case1: " + solution.majorityElement(new int[] {3,2,3}));
+		System.out.println("Majority Element case2: " + solution.majorityElement(new int[] {2,2,1,1,1,2,2}));
+		System.out.println("##################################");
+		
+		/*Reverse Linked List*/
+		ListNode rl = solution.reverseList(new ListNode(1,new ListNode(2,new ListNode(3,new ListNode(4,new ListNode(5))))));
+		System.out.print("Reverse Linked List: [");
+		while (rl != null) {
+			System.out.print(rl.val + " ");
+			rl = rl.next;
+		}
+		System.out.println("]");
+		System.out.println("##################################");
+		
 		long afterTime = System.currentTimeMillis();
-		System.out.println("##################################\nrunTime: " + (afterTime - beforeTime));
+		System.out.println("##################################\nrunTime: " + (afterTime - beforeTime) + "ms");
 	}
 
 	static class Solutions {
+
+		/*
+		 * 206. Reverse Linked List
+		 */
+		public ListNode reverseList(ListNode head) {
+			if (head == null) {
+				return head;
+			}
+			ListNode prev = head;
+			ListNode temp = head.next;
+			while (temp != null) {
+				ListNode next = temp.next;
+				temp.next = prev;
+				prev = temp;
+				temp = next;
+			}
+			head.next = null;
+			return prev;
+		}
+
+		/*
+		 * 169. Majority Element
+		 */
+		public int majorityElement(int[] nums) {
+			Map<Integer, Integer> map = new HashMap<>();
+			for (int i = 0; i < nums.length; i++) {
+				if (map.get(nums[i]) == null) {
+					map.put(nums[i], 1);
+				} else {
+					map.put(nums[i], map.get(nums[i])+1);
+				}
+			}
+			Set<Integer> keySet = map.keySet();
+			
+			int resultkey = 0;
+			int resultValue = 0;
+			
+			for (Integer key: keySet) {
+				if (Math.max(resultValue, map.get(key)) == map.get(key)) {
+					resultValue = map.get(key);
+					resultkey = key;
+				}
+			}
+			
+			return resultkey;
+		}
+
+		/*
+		 * 160. Intersection of Two Linked Lists
+		 */
+		public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+			
+			List<Integer> listA = new ArrayList<>();
+			List<Integer> listB = new ArrayList<>();
+			
+			ListNode target = headA;
+			
+			while(headA != null) {
+				listA.add(headA.val);
+				headA = headA.next;
+			}
+			while(headB != null) {
+				listB.add(headB.val);
+				headB = headB.next;
+			}
+			int idx = -1;
+			if (listA.size() >= listB.size()) {
+				for (int i = 0; i < listB.size(); i++) {
+					Integer a = listA.subList(listA.size()-listB.size()+i, listA.size()).parallelStream().reduce(0, Integer::sum);
+					Integer b = listB.subList(0+i, listB.size()).parallelStream().reduce(0, Integer::sum);
+					if (a == b) {
+						idx = i+1;
+						break;
+					}
+				}
+			} else {
+				for (int i = 0; i < listA.size(); i++) {
+					Integer a = listA.subList(0+i, listA.size()).parallelStream().reduce(0, Integer::sum);
+					Integer b = listB.subList(listB.size()-listA.size()+i, listB.size()).parallelStream().reduce(0, Integer::sum);
+					if (a == b) {
+						idx = i+1;
+						break;
+					}
+				}
+				
+			}
+			
+			if (idx < 0) {
+				return null;
+			} else {
+				for (int i = 0; i < idx; i++) {
+					target = target.next;
+				}
+				System.out.println("value => " + target.val);
+				return target;
+			}
+			
+		}
+
+		/*
+		 * 155. Min Stack
+		 */
+		static class MinStack {
+
+			private Stack<Integer> stack;
+			private Stack<Integer> minStack;
+
+			public MinStack() {
+				stack = new Stack<>();
+				minStack = new Stack<>();
+			}
+
+			public void push(int val) {
+				if (this.stack.isEmpty()) {
+					this.stack.push(val);
+					this.minStack.push(val);
+					return;
+				}
+				this.stack.push(val);
+				if (this.minStack.peek() > val)
+					this.minStack.push(val);
+				else
+					this.minStack.push(this.minStack.peek());
+			}
+
+			public void pop() {
+				if (this.stack.isEmpty())
+					return;
+				this.stack.pop();
+				this.minStack.pop();
+			}
+
+			public int top() {
+				return this.stack.peek();
+			}
+
+			public int getMin() {
+				return this.minStack.peek();
+			}
+		}
+
+		/*
+		 * 141. Linked List Cycle
+		 */
+		public boolean hasCycle(ListNode head) {
+			Set<ListNode> nodesSeen = new HashSet<>();
+			while (head != null) {
+				if (nodesSeen.contains(head)) {
+					return true;
+				}
+				nodesSeen.add(head);
+				head = head.next;
+			}
+			return false;
+		}
 
 		/*
 		 * 136. Single Number
